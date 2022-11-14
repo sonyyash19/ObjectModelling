@@ -6,6 +6,7 @@ public class UserRegistrationDto {
     private final String contestName;
     private final String userName;
     private final RegisterationStatus registerationStatus;
+    
     public UserRegistrationDto(String contestName, String userName, RegisterationStatus registerationStatus) {
         this.contestName = contestName;
         this.userName = userName;

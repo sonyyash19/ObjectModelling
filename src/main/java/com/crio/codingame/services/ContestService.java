@@ -58,9 +58,9 @@ public class ContestService implements IContestService {
 
     private List<Question> pickQuestionsList(final List<Question> questions,final Integer numQuestion){
 
-        List<Question> question = new ArrayList<>();
-        Random random = new Random();
-        question.add(questions.get(random.nextInt(numQuestion)));
+        List<Question> question = pickRandomQuestions(questions);
+        // Random random = new Random();
+        // question.add(questions.get(random.nextInt(numQuestion)));
 
      return question;
     }

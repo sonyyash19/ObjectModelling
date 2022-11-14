@@ -88,22 +88,22 @@ public class UserService implements IUserService {
         Optional<User> user = userRepository.findByName(userName);
 
         if(contest.isEmpty()){
-            throw new ContestNotFoundException();
+            throw new ContestNotFoundException("Cannot Withdraw Contest. Contest for given id:"+contestId+" not found!");
         }
         if(user.isEmpty()){
-            throw new UserNotFoundException();
+            throw new UserNotFoundException("Cannot Withdraw Contest. User for given name:"+ userName+" not found!");
         }
         if(contest.get().getContestStatus().equals(ContestStatus.IN_PROGRESS)){
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot Withdraw Contest. Contest for given id:"+contestId+" is in progress!");
         }
         if(contest.get().getContestStatus().equals(ContestStatus.ENDED)){
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot Withdraw Contest. Contest for given id:"+contestId+" is ended!");
         }
         if(contest.get().getCreator().getName().equals(user.get().getName())){
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot Withdraw Contest. Contest Creator:"+userName+ "not allowed to withdraw contest!");
         }
         if(!user.get().checkIfContestExists(contest.get())){
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot Withdraw Contest. Contest for given id:"+contestId+" is not registered!");
         }
 
         user.get().deleteContest(contest.get());

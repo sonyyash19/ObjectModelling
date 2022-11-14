@@ -85,7 +85,7 @@ public class UserRepository implements IUserRepository{
 
     @Override
     public Optional<User> findByName(String name) {
-        Optional<User> user = userMap.values().stream().filter(u -> u.getName().equals(name)).findFirst();
+        Optional<User> user = userMap.values().stream().filter(u -> u.getName().equalsIgnoreCase(name)).findFirst();
      return user;
     }
     
