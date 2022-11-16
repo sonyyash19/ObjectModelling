@@ -25,7 +25,8 @@ public class ListContestCommand implements ICommand{
     @Override
     public void execute(List<String> tokens) {
 
-        Level level = null;
+        if(tokens.get(0).equalsIgnoreCase("list-contest")){
+            Level level = null;
 
         if(tokens.size() == 2){
             level = Level.valueOf(tokens.get(1));
@@ -43,6 +44,7 @@ public class ListContestCommand implements ICommand{
         }
      }
         System.out.print("]");
+        }
 
     }
     

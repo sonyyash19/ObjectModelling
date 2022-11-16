@@ -25,7 +25,8 @@ public class LeaderBoardCommand implements ICommand{
     @Override
     public void execute(List<String> tokens) {
 
-        List<User> users = userService.getAllUserScoreOrderWise(ScoreOrder.valueOf(tokens.get(1)));
+        if(tokens.get(0).equalsIgnoreCase("leaderboard")){
+            List<User> users = userService.getAllUserScoreOrderWise(ScoreOrder.valueOf(tokens.get(1)));
 
         Iterator<User> iterator = users.iterator();
         System.out.print("[");
@@ -38,6 +39,7 @@ public class LeaderBoardCommand implements ICommand{
             
         }
         System.out.print("]");
+        }
 
     }
     

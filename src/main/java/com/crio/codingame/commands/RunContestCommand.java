@@ -16,13 +16,15 @@ public class RunContestCommand implements ICommand {
 
     @Override
     public void execute(List<String> tokens) {
-        String contestId = tokens.get(1);
+        if(tokens.get(0).equalsIgnoreCase("run-contest")){
+            String contestId = tokens.get(1);
         String contestCreator = tokens.get(2);
         try{
         ContestSummaryDto contestSummaryDto = contestService.runContest(contestId, contestCreator);
         System.out.println(contestSummaryDto.getUsers().stream().map(u -> "[UserName:" + u.getName() + " [Questions: " + u.getQuestionsByContest(contestSummaryDto.getContest()) + "]" + "]" ).collect(Collectors.joining(", ")));
         }catch(RuntimeException e){
             System.out.println(e.getMessage());
+        }
         }
     }
     

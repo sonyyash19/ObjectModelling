@@ -25,11 +25,11 @@ public class CreateContestCommand implements ICommand{
 
     @Override
     public void execute(List<String> tokens) {
-        String contestName = tokens.get(1);
+        if(tokens.get(0).equalsIgnoreCase("create-contest")){
+            String contestName = tokens.get(1);
         Level level = Level.valueOf(tokens.get(2).toUpperCase());
         String contestCreator = tokens.get(3);
         
-        // System.out.println("Question: " + numOfQuestion);
         try {
             Contest contest = null;
             if(tokens.size() == 5){
@@ -42,6 +42,7 @@ public class CreateContestCommand implements ICommand{
             System.out.println(contest);
         } catch (Exception e) {
             System.out.println(e.getMessage());
+        }
         }
     }
     

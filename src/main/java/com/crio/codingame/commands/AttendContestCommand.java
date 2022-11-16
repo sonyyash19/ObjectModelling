@@ -23,11 +23,13 @@ public class AttendContestCommand implements ICommand{
     @Override
     public void execute(List<String> tokens) {
 
-        try {
-            UserRegistrationDto userRegistrationDto = userService.attendContest(tokens.get(1), tokens.get(2));
-            System.out.println(userRegistrationDto);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        if(tokens.get(0).equalsIgnoreCase("ATTEND-CONTEST")){
+            try {
+                UserRegistrationDto userRegistrationDto = userService.attendContest(tokens.get(1), tokens.get(2));
+                System.out.println(userRegistrationDto);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
         
     }

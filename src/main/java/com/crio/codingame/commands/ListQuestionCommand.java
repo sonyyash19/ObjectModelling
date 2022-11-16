@@ -23,14 +23,16 @@ public class ListQuestionCommand implements ICommand{
 
     @Override
     public void execute(List<String> tokens) {
-        if(tokens.size() == 1){
-            List<Question> qList = questionService.getAllQuestionLevelWise(null);
+        if(tokens.get(0).equalsIgnoreCase("list-question")){
+            if(tokens.size() == 1){
+                List<Question> qList = questionService.getAllQuestionLevelWise(null);
+                System.out.println(qList);
+                return;
+            }
+            String level = tokens.get(1);
+            List<Question> qList = questionService.getAllQuestionLevelWise(Level.valueOf(level));
             System.out.println(qList);
-            return;
         }
-        String level = tokens.get(1);
-        List<Question> qList = questionService.getAllQuestionLevelWise(Level.valueOf(level));
-        System.out.println(qList);
     }
     
 }
