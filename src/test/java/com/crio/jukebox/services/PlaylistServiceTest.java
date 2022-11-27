@@ -217,7 +217,7 @@ public class PlaylistServiceTest {
     public void  addSongToPlaylist_ShouldReturnCorrectOutput(){
 
         //Arrange
-        List<String> songId = Arrays.asList(new String[] {"4", "5", "6"}); 
+        List<String> songId = Arrays.asList(new String[] {"4"}); 
 
         List<Song> songsPresentInPlaylist = new ArrayList<Song>(){
             {
@@ -227,34 +227,25 @@ public class PlaylistServiceTest {
                 
             }
         };
-        List<Song> newSongs = new ArrayList<Song>(){
-            {
-                add(new Song("4", "songName1", "genre1", "albumName1", "artist1", "featuredArtist"));
-                add(new Song("5", "songName2", "genre2", "albumName2", "artist2", "featuredArtist"));
-                add(new Song("6", "songName3", "genre3", "albumName3", "artist3", "featuredArtist"));
-                
-            }
-        };
+        Song addSong = new Song("4", "songName1", "genre1", "albumName1", "artist1", "featuredArtist");
         Playlist playlist = new Playlist("1", "playlistName", songsPresentInPlaylist);
         User user = new User("1", "name", Arrays.asList(playlist));
 
         when(userRepositoryMock.findById(anyString())).thenReturn(Optional.of(user));
         when(playlistRepositoryMock.findById(anyString())).thenReturn(Optional.of(playlist));
-        when(songRepositorMock.findById(anyString())).thenReturn(Optional.of(newSongs.get(0)), Optional.of(newSongs.get(1)), Optional.of(newSongs.get(2)));
+        when(songRepositorMock.findById(anyString())).thenReturn(Optional.of(addSong));
         when(playlistRepositoryMock.save(any(Playlist.class))).thenReturn(playlist);
         
-        String expectedOutput = "Playlist ID - 1" + "\nPlaylist Name - playlistName" + "\nSong IDs - 1 2 3 4 5 6";
-
+        String expectedOutput = "Playlist ID - 1" + "\nPlaylist Name - playlistName" + "\nSong IDs - 1 2 3 4";
 
         //Act
         String actualOutput = playlistServiceImpl.modifyPlaylist("ADD-SONG","1", "1", songId);
-
 
         //act and assert
         assertEquals(expectedOutput, actualOutput.toString());
         verify(userRepositoryMock, times(1)).findById(anyString());
         verify(playlistRepositoryMock, times(1)).findById(anyString());
-        verify(songRepositorMock, times(3)).findById(anyString());
+        verify(songRepositorMock, times(1)).findById(anyString());
         verify(playlistRepositoryMock,times(1)).save(any(Playlist.class));
 
     }
@@ -284,7 +275,7 @@ public class PlaylistServiceTest {
 
         when(userRepositoryMock.findById(anyString())).thenReturn(Optional.of(user));
         when(playlistRepositoryMock.findById(anyString())).thenReturn(Optional.of(playlist));
-        when(songRepositorMock.findById(anyString())).thenReturn(Optional.of(test.get(0)), Optional.of(test.get(1)));
+        when(songRepositorMock.findById(anyString())).thenReturn(Optional.of(test.get(0)));
          
         List<String> songId = Arrays.asList(new String[] {"5", "4"}); 
 
