@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import com.crio.jukebox.dto.ModifyPlaylistDto;
-import com.crio.jukebox.dto.SongDto;
 import com.crio.jukebox.entities.Playlist;
 import com.crio.jukebox.entities.Song;
 import com.crio.jukebox.entities.User;
@@ -70,7 +68,6 @@ public class PlaylistServiceTest {
     public void createPlaylistWithMultipleSongs_ShouldReturnPlaylistId(){
 
         // Arrange
-        String expectedId = "2";
         List<String> songId = Arrays.asList(new String[] {"1", "2", "3"}); 
                 
         List<Song> songs = new ArrayList<Song>(){
@@ -98,12 +95,13 @@ public class PlaylistServiceTest {
         when(playlistRepositoryMock.save(any(Playlist.class))).thenReturn(newplaylist);
         when(userRepositoryMock.save(any(User.class))).thenReturn(user);
         
+        String expectedOutput = "Playlist ID - 2";
 
         //Act
-        String actualplaylistId = playlistServiceImpl.create("1", "playlistName2",songId);
+        String actualOutput = playlistServiceImpl.create("1", "playlistName2",songId);
 
         //Assert
-        assertEquals(expectedId, actualplaylistId);
+        assertEquals(expectedOutput, actualOutput);
         verify(userRepositoryMock, times(1)).findById(anyString());
         verify(songRepositorMock, times(3)).findById(anyString());
         verify(playlistRepositoryMock, times(1)).save(any(Playlist.class));
@@ -134,18 +132,18 @@ public class PlaylistServiceTest {
             }
         };
         User user = new User("1", "Name", playlists);
-        when(userRepositoryMock.findById(anyString())).thenReturn(Optional.of(user));
-        when(playlistRepositoryMock.findById(anyString())).thenReturn(Optional.of(playlists.get(0)), Optional.of(playlists.get(1)));
+        user.deletePlaylist(playlists.get(1));
 
-        User userNew = new User("1","Name",Arrays.asList(playlists.get(0)));
-        when(userRepositoryMock.save(any(User.class))).thenReturn(userNew);
+        when(userRepositoryMock.findById(anyString())).thenReturn(Optional.of(user));
+        when(playlistRepositoryMock.findById(anyString())).thenReturn(Optional.of(playlists.get(0)));
+        when(userRepositoryMock.save(any(User.class))).thenReturn(user);
         when(playlistRepositoryMock.save(any(Playlist.class))).thenReturn(playlists.get(0));
 
         //Act
         String actualOuput = playlistServiceImpl.delete("1", "2");
 
         //Assert
-        assertEquals("Deleted Successfully", actualOuput);
+        assertEquals("Delete Successful", actualOuput);
         verify(playlistRepositoryMock, times(1)).findById(anyString());
         verify(userRepositoryMock, times(1)).findById(anyString());
         verify(userRepositoryMock, times(1)).save(any(User.class));
@@ -168,16 +166,17 @@ public class PlaylistServiceTest {
         };
         Playlist playlist = new Playlist("1", "playlistName", songsPresentInPlaylist);
         User user = new User("1", "name", Arrays.asList(playlist));
+        Song songInRepo = new Song("1", "songName1", "genre1", "albumName1", "artist1", "featuredArtist");
+
 
         when(userRepositoryMock.findById(anyString())).thenReturn(Optional.of(user));
         when(playlistRepositoryMock.findById(anyString())).thenReturn(Optional.of(playlist));
-
-        List<String> songId = Arrays.asList(new String[] {"1", "5", "4"});
-        Song songInRepo = new Song("1", "songName1", "genre1", "albumName1", "artist1", "featuredArtist");
         when(songRepositorMock.findById(anyString())).thenReturn(Optional.of(songInRepo));
 
+        List<String> songId = Arrays.asList(new String[] {"1", "5", "4"});
+
         //act and assert
-        assertThrows(SongAlreadyPresentInPlaylistException.class, () -> playlistServiceImpl.addSongToPlaylist("1", "1", songId));
+        assertThrows(SongAlreadyPresentInPlaylistException.class, () -> playlistServiceImpl.modifyPlaylist("ADD-SONG","1", "1", songId));
         verify(userRepositoryMock, times(1)).findById(anyString());
         verify(playlistRepositoryMock, times(1)).findById(anyString());
 
@@ -188,8 +187,6 @@ public class PlaylistServiceTest {
     public void  addSongToPlaylist_ShouldReturnSongNotAvailableException(){
 
         //Arrange
-        List<String> songId = Arrays.asList(new String[] {"1", "5", "6"}); 
-
         List<Song> songsPresentInPlaylist = new ArrayList<Song>(){
             {
                 add(new Song("1", "songName1", "genre1", "albumName1", "artist1", "featuredArtist"));
@@ -203,12 +200,12 @@ public class PlaylistServiceTest {
 
         when(userRepositoryMock.findById(anyString())).thenReturn(Optional.of(user));
         when(playlistRepositoryMock.findById(anyString())).thenReturn(Optional.of(playlist));
-
         when(songRepositorMock.findById(anyString())).thenReturn(Optional.empty());
 
+        List<String> songId = Arrays.asList(new String[] {"1", "5", "6"}); 
 
         //act and assert
-        assertThrows(SongNotAvailableException.class, () -> playlistServiceImpl.addSongToPlaylist("1", "1", songId));
+        assertThrows(SongNotAvailableException.class, () -> playlistServiceImpl.modifyPlaylist("ADD-SONG","1", "1", songId));
         verify(userRepositoryMock, times(1)).findById(anyString());
         verify(playlistRepositoryMock, times(1)).findById(anyString());
         verify(songRepositorMock, times(1)).findById(anyString());
@@ -217,7 +214,7 @@ public class PlaylistServiceTest {
 
     @Test
     @DisplayName("7. Add Song to playlist should return ModifyPlaylistDto")
-    public void  addSongToPlaylist_ShouldReturnModifyPlaylistDto(){
+    public void  addSongToPlaylist_ShouldReturnCorrectOutput(){
 
         //Arrange
         List<String> songId = Arrays.asList(new String[] {"4", "5", "6"}); 
@@ -230,12 +227,6 @@ public class PlaylistServiceTest {
                 
             }
         };
-        Playlist playlist = new Playlist("1", "playlistName", songsPresentInPlaylist);
-        User user = new User("1", "name", Arrays.asList(playlist));
-
-        when(userRepositoryMock.findById(anyString())).thenReturn(Optional.of(user));
-        when(playlistRepositoryMock.findById(anyString())).thenReturn(Optional.of(playlist));
-
         List<Song> newSongs = new ArrayList<Song>(){
             {
                 add(new Song("4", "songName1", "genre1", "albumName1", "artist1", "featuredArtist"));
@@ -244,32 +235,23 @@ public class PlaylistServiceTest {
                 
             }
         };
-        List<Song> allSongs = new ArrayList<Song>(){
-            {
-                add(new Song("1", "songName1", "genre1", "albumName1", "artist1", "featuredArtist"));
-                add(new Song("2", "songName2", "genre2", "albumName2", "artist2", "featuredArtist"));
-                add(new Song("3", "songName3", "genre3", "albumName3", "artist3", "featuredArtist"));
-                add(new Song("4", "songName1", "genre1", "albumName1", "artist1", "featuredArtist"));
-                add(new Song("5", "songName2", "genre2", "albumName2", "artist2", "featuredArtist"));
-                add(new Song("6", "songName3", "genre3", "albumName3", "artist3", "featuredArtist"));
-                
-            }
-        };
-        Playlist expectedPlaylist = new Playlist("1", "playlistName", allSongs);
+        Playlist playlist = new Playlist("1", "playlistName", songsPresentInPlaylist);
+        User user = new User("1", "name", Arrays.asList(playlist));
 
-        for(Song song: newSongs){
-            when(songRepositorMock.findById(anyString())).thenReturn(Optional.of(song));
-        }
-        when(playlistRepositoryMock.save(any(Playlist.class))).thenReturn(expectedPlaylist);
-        ModifyPlaylistDto expectedOutput = new ModifyPlaylistDto("1", "playlistName", songId);
+        when(userRepositoryMock.findById(anyString())).thenReturn(Optional.of(user));
+        when(playlistRepositoryMock.findById(anyString())).thenReturn(Optional.of(playlist));
+        when(songRepositorMock.findById(anyString())).thenReturn(Optional.of(newSongs.get(0)), Optional.of(newSongs.get(1)), Optional.of(newSongs.get(2)));
+        when(playlistRepositoryMock.save(any(Playlist.class))).thenReturn(playlist);
+        
+        String expectedOutput = "Playlist ID - 1" + "\nPlaylist Name - playlistName" + "\nSong IDs - 1 2 3 4 5 6";
 
 
         //Act
-        ModifyPlaylistDto actualOutput = playlistServiceImpl.addSongToPlaylist("1", "1", songId);
+        String actualOutput = playlistServiceImpl.modifyPlaylist("ADD-SONG","1", "1", songId);
 
 
         //act and assert
-        assertEquals(expectedOutput.toString(), actualOutput.toString());
+        assertEquals(expectedOutput, actualOutput.toString());
         verify(userRepositoryMock, times(1)).findById(anyString());
         verify(playlistRepositoryMock, times(1)).findById(anyString());
         verify(songRepositorMock, times(3)).findById(anyString());
@@ -290,12 +272,6 @@ public class PlaylistServiceTest {
                 
             }
         };
-        Playlist playlist = new Playlist("1", "playlistName", songsPresentInPlaylist);
-        User user = new User("1", "name", Arrays.asList(playlist)); 
-
-        when(userRepositoryMock.findById(anyString())).thenReturn(Optional.of(user));
-        when(playlistRepositoryMock.findById(anyString())).thenReturn(Optional.of(playlist));
-
         List<Song> test = new ArrayList<Song>(){
             {
                 add(new Song("5", "songName1", "genre1", "albumName1", "artist1", "featuredArtist"));
@@ -303,13 +279,17 @@ public class PlaylistServiceTest {
                 
             }
         };
-        for(Song song: test){
-            when(songRepositorMock.findById(anyString())).thenReturn(Optional.of(song));
-        }
+        Playlist playlist = new Playlist("1", "playlistName", songsPresentInPlaylist);
+        User user = new User("1", "name", Arrays.asList(playlist)); 
+
+        when(userRepositoryMock.findById(anyString())).thenReturn(Optional.of(user));
+        when(playlistRepositoryMock.findById(anyString())).thenReturn(Optional.of(playlist));
+        when(songRepositorMock.findById(anyString())).thenReturn(Optional.of(test.get(0)), Optional.of(test.get(1)));
+         
         List<String> songId = Arrays.asList(new String[] {"5", "4"}); 
 
         //act and assert
-        assertThrows(SongNotPresentInPlaylistException.class, () -> playlistServiceImpl.deleteSongFromPlaylist("1", "1", songId));
+        assertThrows(SongNotPresentInPlaylistException.class, () -> playlistServiceImpl.modifyPlaylist("DELETE-SONG","1", "1", songId));
         verify(userRepositoryMock, times(1)).findById(anyString());
         verify(playlistRepositoryMock, times(1)).findById(anyString());
         verify(songRepositorMock, times(2)).findById(anyString());
@@ -318,11 +298,9 @@ public class PlaylistServiceTest {
 
     @Test
     @DisplayName("9. Delete Song from playlist should return ModifyPlaylistDto")
-    public void  deleteSongFromPlaylist_ShouldReturnModifyPlaylistDto(){
+    public void  deleteSongFromPlaylist_ShouldCorrectOutput(){
 
         //Arrange
-        List<String> songId = Arrays.asList(new String[] {"2"}); 
-
         List<Song> songsPresentInPlaylist = new ArrayList<Song>(){
             {
                 add(new Song("1", "songName1", "genre1", "albumName1", "artist1", "featuredArtist"));
@@ -336,30 +314,20 @@ public class PlaylistServiceTest {
 
         when(userRepositoryMock.findById(anyString())).thenReturn(Optional.of(user));
         when(playlistRepositoryMock.findById(anyString())).thenReturn(Optional.of(playlist));
-        List<Song> allSongs = new ArrayList<Song>(){
-            {
-                add(new Song("1", "songName1", "genre1", "albumName1", "artist1", "featuredArtist"));
-                add(new Song("3", "songName3", "genre3", "albumName3", "artist3", "featuredArtist"));
-            }
-        };
-        Playlist expectedPlaylist = new Playlist("1", "playlistName", allSongs);
-        when(playlistRepositoryMock.save(any(Playlist.class))).thenReturn(expectedPlaylist);
+        when(playlistRepositoryMock.save(any(Playlist.class))).thenReturn(playlist);
 
-        // Song song3 = new Song("3", "songName2", "genre2", "albumName2", "artist2", "featuredArtist");
         Song song2 = new Song("2", "songName1", "genre1", "albumName1", "artist1", "featuredArtist");
-
         when(songRepositorMock.findById(anyString())).thenReturn(Optional.of(song2));
-        // when(songRepositorMock.findById(anyString())).thenReturn(Optional.of(song3));
 
-
-        ModifyPlaylistDto expectedOutput = new ModifyPlaylistDto("1", "playlistName", songId);
+        List<String> songId = Arrays.asList(new String[] {"2"}); 
+        String expectedOutput = "Playlist ID - 1" + "\nPlaylist Name - playlistName" + "\nSong IDs - 1 3";
 
         //Act
-        ModifyPlaylistDto actualOutput = playlistServiceImpl.deleteSongFromPlaylist("1", "1", songId);
+        String actualOutput = playlistServiceImpl.modifyPlaylist("DELETE-SONG","1", "1", songId);
 
 
         //act and assert
-        assertEquals(expectedOutput.toString(), actualOutput.toString());
+        assertEquals(expectedOutput, actualOutput.toString());
         verify(userRepositoryMock, times(1)).findById(anyString());
         verify(playlistRepositoryMock, times(1)).findById(anyString());
         verify(playlistRepositoryMock,times(1)).save(any(Playlist.class));
@@ -376,12 +344,10 @@ public class PlaylistServiceTest {
         User user = new User("1", "name", Arrays.asList(playlist));
 
         when(userRepositoryMock.findById(anyString())).thenReturn(Optional.of(user));
-        // when(playlistRepositoryMock.findById(anyString())).thenReturn(Optional.of(playlist));
 
         //Act and Assert
         assertThrows(EmptyPlaylistException.class, () -> playlistServiceImpl.playPlaylist("1", "1"));
         verify(userRepositoryMock, times(1)).findById(anyString());
-        // verify(playlistRepositoryMock, times(1)).findById(anyString());
 
     }
 
@@ -402,20 +368,12 @@ public class PlaylistServiceTest {
         User user = new User("1", "name", Arrays.asList(playlist));
 
         when(userRepositoryMock.findById(anyString())).thenReturn(Optional.of(user));
-        // when(playlistRepositoryMock.findById(anyString())).thenReturn(Optional.of(playlist));
-        // Song expectedSong = new Song("3", "songName1", "genre1", "albumName1", "artist1", "featuredArtist");
-        SongDto expectedSong = new SongDto("Current Song Playing.", "songName1", "albumName1", "featuredArtists");
+        String expectedSong = "Current Song Playing" + "\nSong - songName1" + "\nAlbum - albumName1" +
+                "\nArtists - featuredArtists";
         //Act
-        SongDto song = playlistServiceImpl.playPlaylist("1", "1");
+        String song = playlistServiceImpl.playPlaylist("1", "1");
 
-        assertEquals(expectedSong.toString(), song.toString());
+        assertEquals(expectedSong, song.toString());
         verify(userRepositoryMock, times(1)).findById(anyString());
-        // verify(playlistRepositoryMock, times(1)).findById(anyString());
-
     }
-
-    
-
-    
-
 }

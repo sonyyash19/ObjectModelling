@@ -28,6 +28,7 @@ public class SongRepository implements ISongRepository{
             autoIncrement++;
             Song song = new Song(Integer.toString(autoIncrement), entity.getSongName(), entity.getGenre(), entity.getAlbumName(), entity.getArtist(), entity.getFeaturedArtists());
             songMap.put(song.getId(), song);
+            return song;
         }
         songMap.put(entity.getId(), entity);
         return entity;

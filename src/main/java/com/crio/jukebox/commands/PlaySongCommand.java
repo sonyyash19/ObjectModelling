@@ -1,7 +1,6 @@
 package com.crio.jukebox.commands;
 
 import java.util.List;
-import com.crio.jukebox.dto.SongDto;
 import com.crio.jukebox.services.ISongService;
 
 public class PlaySongCommand implements ICommand{
@@ -22,8 +21,13 @@ public class PlaySongCommand implements ICommand{
     @Override
     public void execute(List<String> tokens) {
         if(tokens.get(0).equalsIgnoreCase("play-song")){
-            SongDto playSong = songService.playSong(tokens.get(1), tokens.get(2));
-            System.out.println(playSong);
+            try {
+                String playSong = songService.playSong(tokens.get(1), tokens.get(2));
+                System.out.println(playSong);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+            
         }
         
     }

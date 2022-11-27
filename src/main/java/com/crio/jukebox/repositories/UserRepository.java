@@ -28,6 +28,7 @@ public class UserRepository implements IUserRepository{
             autoIncrement++;
             User user = new User(Integer.toString(autoIncrement), entity.getName());
             userMap.put(user.getId(), user);
+            return user;
         }
         userMap.put(entity.getId(), entity);
         return entity;

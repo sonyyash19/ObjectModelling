@@ -10,15 +10,11 @@ import java.util.stream.Collectors;
 import com.crio.jukebox.appConfig.ApplicationConfig;
 import com.crio.jukebox.commands.CommandInvoker;
 import com.crio.jukebox.exceptions.NoSuchCommandException;
-import com.crio.jukebox.repositories.SongRepository;
-import com.crio.jukebox.services.ISongService;
-import com.crio.jukebox.services.SongServiceImpl;
 
 
 public class App {
     // To run the application  ./gradlew run --args="INPUT_FILE=jukebox-input.txt"
 	public static void main(String[] args) {
-        // loadSongs();
 		List<String> commandLineArgs = new LinkedList<>(Arrays.asList(args));
         String expectedSequence = "INPUT-FILE";
         String actualSequence = commandLineArgs.stream()
@@ -49,10 +45,4 @@ public class App {
             e.printStackTrace();
         }
     }
-
-    // public static void loadSongs(){
-    //     ISongService songService = new SongServiceImpl(new SongRepository());
-
-    //     songService.loadSongs("songs.csv");
-    // }
 }

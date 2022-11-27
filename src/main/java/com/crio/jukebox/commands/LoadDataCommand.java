@@ -1,7 +1,6 @@
 package com.crio.jukebox.commands;
 
 import java.util.List;
-import com.crio.jukebox.entities.Song;
 import com.crio.jukebox.services.ISongService;
 
 public class LoadDataCommand implements ICommand{
@@ -18,7 +17,7 @@ public class LoadDataCommand implements ICommand{
     @Override
     public void execute(List<String> tokens) {
         if(tokens.get(0).equalsIgnoreCase("load-data")){
-            List<Song> songs = songService.loadSongs(tokens.get(1));
+            String songs = songService.loadSongs(tokens.get(1));
             System.out.println(songs);
         }
         

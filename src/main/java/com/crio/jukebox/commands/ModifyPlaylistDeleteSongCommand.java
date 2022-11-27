@@ -2,7 +2,6 @@ package com.crio.jukebox.commands;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.crio.jukebox.dto.ModifyPlaylistDto;
 import com.crio.jukebox.services.IPlaylistService;
 
 public class ModifyPlaylistDeleteSongCommand implements ICommand{
@@ -25,7 +24,7 @@ public class ModifyPlaylistDeleteSongCommand implements ICommand{
                 songIds.add(tokens.get(i));
             }
             
-            ModifyPlaylistDto deleteSongFromPlaylist = playlistService.modifyPlaylist(tokens.get(1), tokens.get(2), tokens.get(3), songIds);
+            String deleteSongFromPlaylist = playlistService.modifyPlaylist(tokens.get(1), tokens.get(2), tokens.get(3), songIds);
             System.out.println(deleteSongFromPlaylist);
         }
         

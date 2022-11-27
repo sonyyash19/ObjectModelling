@@ -3,8 +3,6 @@ package com.crio.jukebox.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import com.crio.jukebox.dto.ModifyPlaylistDto;
-import com.crio.jukebox.dto.SongDto;
 import com.crio.jukebox.entities.Playlist;
 import com.crio.jukebox.entities.Song;
 import com.crio.jukebox.entities.User;
@@ -45,7 +43,7 @@ public class PlaylistServiceImpl implements IPlaylistService{
         Playlist playlist = playlistRepository.save(playlistToBeSaved);
         user.get().addPlaylist(playlist);
         userRepository.save(user.get());
-        return playlist.getId();
+        return "Playlist ID - " + playlist.getId();
     }
 
     @Override
@@ -62,29 +60,30 @@ public class PlaylistServiceImpl implements IPlaylistService{
         playlistRepository.save(playlist.get());
         userRepository.save(user.get());
 
-        return "Deleted Successfully";
+        return "Delete Successful";
     }
 
     
 
     @Override
-    public ModifyPlaylistDto modifyPlaylist(String message, String userId, String playlistId, List<String> songId){
+    public String modifyPlaylist(String message, String userId, String playlistId, List<String> songId){
+
+        User user = userRepository.findById(userId).get();
+        Playlist playlist = playlistRepository.findById(playlistId).get();
 
         if(message.equalsIgnoreCase("add-song")){
-            addSongToPlaylist(userId, playlistId, songId);
+             return addSongToPlaylist(user, playlist, songId);
         }
 
         if(message.equalsIgnoreCase("delete-song")){
-            deleteSongFromPlaylist(userId, playlistId, songId);
+            return deleteSongFromPlaylist(user, playlist, songId);
         }
 
         return null;
     }
 
-    public ModifyPlaylistDto addSongToPlaylist(String userId, String playlistId,
+    private String addSongToPlaylist(User user, Playlist playlist,
             List<String> songId) {
-        Optional<User> user = userRepository.findById(userId);
-        Optional<Playlist> playlist = playlistRepository.findById(playlistId);
 
         List<Song> songs = new ArrayList<Song>();
         for(String id: songId){
@@ -96,19 +95,17 @@ public class PlaylistServiceImpl implements IPlaylistService{
 
             songs.add(song.get());
         }
+        
+        playlist.addSongs(songs);
+        playlistRepository.save(playlist);
+        userRepository.save(user);
 
-        playlist.get().addSongs(songs);
-        playlistRepository.save(playlist.get());
-        userRepository.save(user.get());
-        ModifyPlaylistDto modifyPlaylistDto = new ModifyPlaylistDto(playlistId, playlist.get().getPlaylistName(), songId);
-        return modifyPlaylistDto;
+        return displayModifyPlaylistOutput(playlist);
     }
 
     
-    public ModifyPlaylistDto deleteSongFromPlaylist(String userId, String playlistId,
+    private String deleteSongFromPlaylist(User user, Playlist playlist,
             List<String> songId) {
-        Optional<User> user = userRepository.findById(userId);
-        Optional<Playlist> playlist = playlistRepository.findById(playlistId);
 
         List<Song> songs = new ArrayList<Song>();
         for(String id: songId){
@@ -116,16 +113,30 @@ public class PlaylistServiceImpl implements IPlaylistService{
             songs.add(song.get());
         }
 
-        playlist.get().deleteSong(songs);
-        playlistRepository.save(playlist.get());
-        userRepository.save(user.get());
+        playlist.deleteSong(songs);
+        playlistRepository.save(playlist);
+        userRepository.save(user);
 
-        ModifyPlaylistDto modifyPlaylistDto = new ModifyPlaylistDto("1", playlist.get().getPlaylistName(), songId);
-        return modifyPlaylistDto;
+        return displayModifyPlaylistOutput(playlist);
+    }
+
+    private String displayModifyPlaylistOutput(Playlist playlist){
+        List<Song> test = playlist.getSongs();
+        String id = "";
+        for(Song song: test){
+            if(test.get(test.size() - 1).equals(song)){
+                id = id + song.getId();
+            }else{
+                id = id + song.getId() + " ";
+            }
+            
+        }
+        return "Playlist ID - " + playlist.getId() + "\nPlaylist Name - " 
+                + playlist.getPlaylistName() + "\nSong IDs - " + id;
     }
 
     @Override
-    public SongDto playPlaylist(String userId, String playlistId) {
+    public String playPlaylist(String userId, String playlistId) {
         User user = userRepository.findById(userId).get();
         List<Playlist> uPlaylists = user.getPlaylist();
 
@@ -143,8 +154,9 @@ public class PlaylistServiceImpl implements IPlaylistService{
         String albumName = playlist.getSongs().get(0).getAlbumName();
         String featuredArtists = playlist.getSongs().get(0).getFeaturedArtists();
 
-        SongDto songDto = new SongDto("Current Song Playing.", songName, albumName, featuredArtists);
-        return songDto;
+        // SongDto songDto = new SongDto("Current Song Playing.", songName, albumName, featuredArtists);
+        return "Current Song Playing\n" + "Song - " + songName + "\nAlbum - " 
+                            + albumName + "\nArtists - " + featuredArtists;
     }
     
 }

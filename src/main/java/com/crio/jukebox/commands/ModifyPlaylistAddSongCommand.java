@@ -2,7 +2,6 @@ package com.crio.jukebox.commands;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.crio.jukebox.dto.ModifyPlaylistDto;
 import com.crio.jukebox.services.IPlaylistService;
 
 public class ModifyPlaylistAddSongCommand implements ICommand{
@@ -24,7 +23,7 @@ public class ModifyPlaylistAddSongCommand implements ICommand{
             for(int i = 4; i < tokensSize; i++){
                 songIds.add(tokens.get(i));
             }
-            ModifyPlaylistDto addSongToPlaylist = playlistService.modifyPlaylist(tokens.get(1), tokens.get(2), tokens.get(3), songIds);
+            String addSongToPlaylist = playlistService.modifyPlaylist(tokens.get(1), tokens.get(2), tokens.get(3), songIds);
             System.out.println(addSongToPlaylist);
         }
         
